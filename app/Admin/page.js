@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Card from "@/components/reportCard";
 
 const reportedItems = [
-  { id: 1, type: "Customer", name: "John Doe", reason: "Fraudulent activity", reportedBy: "Jane Smith", details: "Used fake payment methods.", imageUrl: "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg", status: "Pending" },
+  { id: 1, type: "Customer", name: "Doe Doe", reason: "Fraudulent activity", reportedBy: "Jane Smith", details: "Used fake payment methods.", imageUrl: "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg", status: "Pending" },
   { id: 2, type: "Car", name: "Tesla Model S", reason: "Damaged vehicle", reportedBy: "Michael Johnson", details: "Car was delivered with broken mirrors.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
   { id: 3, type: "Owner", name: "David Miller", reason: "Scamming customers", reportedBy: "Sarah Lee", details: "Owner charged extra fees outside the platform.", imageUrl: "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg", status: "Resolved" },
   { id: 4, type: "Customer", name: "Emily White", reason: "Fake reviews", reportedBy: "John Doe", details: "Customer repeatedly left false reviews.", imageUrl: "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg", status: "Pending" },
@@ -19,7 +19,7 @@ export default function Admin() {
   const filteredReports = filter === "All" ? reportedItems : reportedItems.filter((item) => item.type === filter);
 
   return (
-    <div className="bg-gray-800 text-white min-h-screen flex flex-col">
+    <div className="bg-purple-800 text-white min-h-screen flex flex-col">
       <Navbar />
 
       {/* Welcome Section */}
@@ -32,7 +32,7 @@ export default function Admin() {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-semibold text-white mb-4">Filter Reports by Type</h2>
           <div className="flex justify-center space-x-4">
-            {["All", "Customer", "Car", "Owner"].map((type) => (
+            {["Customer", "Car", "Owner","All"].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilter(type)}
