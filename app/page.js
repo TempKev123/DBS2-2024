@@ -1,29 +1,64 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-export default function Home() {
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+
+export default function Login() {
+
+  
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const router = useRouter();
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault(); // Prevent form reload
+    router.push("/Home"); // Redirect to dashboard
+  };
+
   return (
-    <div className="container mx-auto px-4 bg-gray-800 h-screen w-full">
-      <Navbar/>
-       <Image
-        src="/pics/logobig.png" // Path to your image (can be local or external)
-        alt="Logo of Mikey's Rentals"
-        width={128} // Desired width
-        height={128} // Desired height
-      />
-      <h1 className="text-4xl font-bold my-8 text-white">Welcome to Mikey's rentals! (WIP)</h1>
-      <h1 className="text-4xl font-bold my-8 text-white">Who are you?</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link href="/Rent" className="bg-blue-500 text-white p-4 rounded-md text-center">
-          Renter
-        </Link>
-        <Link href="/Owner" className="bg-green-500 text-white p-4 rounded-md text-center">
-          Owner
-        </Link>
-        <Link href="/Admin" className="bg-purple-500 text-white p-4 rounded-md text-center">
-          Admin login
-        </Link>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Welcome to Mikey's rentals</h2>
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-gray-700">Username</label>
+            <input
+              type="email"
+              name="email"
+              value={credentials.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter username or e-mail"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={credentials.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+          >
+            Login
+          </button>
+        </form>
       </div>
     </div>
   );
 }
+

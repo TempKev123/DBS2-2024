@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Card from "@/components/reportCard";
 
 const reportedItems = [
-  { id: 1, type: "Van", name: "Ford Transit", rate: "$50/day", ownername: "Gregor Sinclair", description: "gg", imageUrl:"https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
+  { id: 1, type: "Van", name: "Ford Transit", rate: "$50/day", ownername: "Gregor Sinclair", description: "Good Old Relyable car.", imageUrl:"https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
   { id: 2, type: "Car", name: "Toyota Corolla", rate: "$30/day", ownername: "Gregor Sinclair", description: "A red car with a flat tire.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
   { id: 3, type: "Truck", name: "Mack Anthem", rate: "$100/day", ownername: "Gregor Sinclair", description: "A heavy-duty truck with engine issues.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Resolved" },
   { id: 4, type: "Car", name: "Honda Civic", rate: "$45/day", ownername: "Gregor Sinclair", description: "A silver car with minor dents on the bumper.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
@@ -84,14 +84,23 @@ export default function Rent() {
 
             <img className="w-full h-48 object-cover rounded-lg" src={selectedReport.imageUrl} alt={selectedReport.name} />
             <h2 className="text-2xl font-bold mt-4 text-gray-800">{selectedReport.type}: {selectedReport.name}</h2>
-            <p className="text-gray-600 mt-2">🚨 Reason: {selectedReport.reason}</p>
-            <p className="text-gray-600 mt-2">📌 Reported By: {selectedReport.reportedBy}</p>
-            <p className="text-gray-600 mt-2">📝 Details: {selectedReport.details}</p>
+            <p className="text-gray-600 mt-2">Owner: {selectedReport.ownername}</p>
+            <p className="text-gray-600 mt-2">Price: {selectedReport.rate}</p>
+            <p className="text-gray-600 mt-2">Description: {selectedReport.description}</p>
             <p className={`mt-4 text-lg font-semibold ${selectedReport.status === "Resolved" ? "text-green-500" : "text-red-500"}`}>
-              Status: {selectedReport.status}
+              
             </p>
 
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-start">
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                Proceed
+              </button>
+            </div>
+
+            <div className="mt-4 flex justify-start">
               <button
                 onClick={() => setSelectedReport(null)}
                 className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"

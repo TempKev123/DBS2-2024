@@ -5,10 +5,10 @@ import Navbar from "@/components/Navbar";
 import Card from "@/components/Card";
 
 const reportedItems = [
-  { id: 1, type: "Van", name: "Ford Transit", rate: "$50/day", description: "A white van with a broken side mirror.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
-  { id: 2, type: "Car", name: "Toyota Corolla", rate: "$30/day", description: "A red car with a flat tire.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
-  { id: 3, type: "Truck", name: "Mack Anthem", rate: "$100/day", description: "A heavy-duty truck with engine issues.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
-  { id: 4, type: "Car", name: "Honda Civic", rate: "$45/day", description: "A silver car with minor dents on the bumper.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Pending" },
+  { id: 1, type: "Van", name: "Ford Transit", rate: "$50/day", description: "A white van with a broken side mirror.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Free" },
+  { id: 2, type: "Car", name: "Toyota Corolla", rate: "$30/day", description: "A red car with a flat tire.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Free" },
+  { id: 3, type: "Truck", name: "Mack Anthem", rate: "$100/day", description: "A heavy-duty truck with engine issues.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Rented" },
+  { id: 4, type: "Car", name: "Honda Civic", rate: "$45/day", description: "A silver car with minor dents on the bumper.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Rented" },
 ];
 var username="Gregor Sinclair"
 
@@ -81,11 +81,11 @@ export default function Owner() {
                   key={item.id}
                   title={`${item.type}: ${item.name}`}
                   description={`Description: ${item.description}`}
-                  ownername={`Owner: ${item.rate}`}
+                  ownername={`Price: ${item.rate}`}
                   imageUrl={item.imageUrl}
-                  buttonText="View Report"
-                  onClick={() => setSelectedReport(item)} // Open modal with report details
-                />
+                  /*buttonText="View Report"
+                  onClick={() => setSelectedReport(item)} // Open modal with report details*/
+                /> 
               ))}
             </div>
           )}
