@@ -15,12 +15,12 @@ export async function POST(req) {
     try {
         await client.connect();
 
-        // Verify user credentials
         const userResult = await client.query(
-            `SELECT u.*, c.customer_id, o.owner_id
+            `SELECT u.*, c.customer_id, o.owner_id, a.admin_id
              FROM Users u
              LEFT JOIN Customer c ON u.user_id = c.user_id
              LEFT JOIN CarOwner o ON u.user_id = o.user_id
+             LEFT JOIN PageAdmin a ON u.user_id = a.user_id
              WHERE u.email = $1 AND u.loginpassword = $2`,
             [email, password]
         );
@@ -39,6 +39,7 @@ export async function POST(req) {
                 userType: user.user_type,
                 customerId: user.customer_id || null,
                 ownerId: user.owner_id || null,
+                adminId: user.admin_id || null, // Ensure admin ID is passed if available
             },
         });
 
@@ -49,3 +50,4 @@ export async function POST(req) {
         await client.end();
     }
 }
+

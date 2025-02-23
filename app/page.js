@@ -83,20 +83,20 @@ export default function AuthPage() {
         city: "",
         province: "",
         country: "",
-        driverLicense: "" 
+        driverLicense: ""
     });
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const router = useRouter();
 
-    // 🌟 Handle input changes
+    // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setCredentials({ ...credentials, [name]: value });
     };
 
-    // 🛠️ Field validation function
+    // Field validation function
     const validateFields = () => {
         const requiredFields = ["firstName", "lastName", "email", "password", "phone", "address", "street", "city", "province", "country"];
         if (credentials.userType === "Customer") requiredFields.push("driverLicense");
@@ -110,13 +110,14 @@ export default function AuthPage() {
         return true;
     };
 
-    // 🔐 Handle login submission
+    // Handle login submission
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
         setSuccess("");
 
         const { email, password } = credentials;
+
         try {
             const response = await fetch("/api/auth/login", {
                 method: "POST",
@@ -130,12 +131,18 @@ export default function AuthPage() {
                 localStorage.setItem("user", JSON.stringify(data.user));
 
                 // Redirect based on userType
-                if (data.user.userType === "Owner") {
-                    router.push("/Owner");
-                } else if (data.user.userType === "Customer") {
-                    router.push("/Rent"); 
-                } else {
-                    alert("Access denied. Unknown user type.");
+                switch (data.user.userType) {
+                    case "Owner":
+                        router.push("/Owner");
+                        break;
+                    case "Customer":
+                        router.push("/Rent");
+                        break;
+                    case "Admin":
+                        router.push("/Admin");  // Redirect admin to the Admin page
+                        break;
+                    default:
+                        alert("Access denied. Unknown user type.");
                 }
             } else {
                 setError(data.error || "❌ Login failed.");
@@ -145,7 +152,7 @@ export default function AuthPage() {
         }
     };
 
-    // 📝 Handle registration
+    // Handle registration
     const handleRegister = async (e) => {
         e.preventDefault();
         setError("");
@@ -178,14 +185,14 @@ export default function AuthPage() {
         <div className="flex min-h-screen items-center justify-center bg-gray-100">
             <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                    {isLogin ? "Login to Mikey's Rentals" : "Create Your Account"}
+                    {isLogin ? "Login to Car Rental" : "Create Your Account"}
                 </h2>
 
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 {success && <p className="text-green-500 text-center mb-4">{success}</p>}
 
                 <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
-                    {/* 🟢 Email & Password (Common) */}
+                    {/* Email & Password */}
                     <div>
                         <label className="block text-gray-700">Email</label>
                         <input
@@ -212,7 +219,7 @@ export default function AuthPage() {
                         />
                     </div>
 
-                    {/* 📝 Registration Fields */}
+                    {/* Registration Fields */}
                     {!isLogin && (
                         <>
                             <div>
@@ -228,7 +235,7 @@ export default function AuthPage() {
                                 </select>
                             </div>
 
-                            {/* 🔑 Personal Info */}
+                            {/* Personal Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-gray-700">First Name</label>
@@ -270,7 +277,7 @@ export default function AuthPage() {
                                 />
                             </div>
 
-                            {/* 🏡 Address Info */}
+                            {/* Address Info */}
                             <div>
                                 <label className="block text-gray-700">Address</label>
                                 <input
@@ -338,7 +345,6 @@ export default function AuthPage() {
                                 </div>
                             </div>
 
-                            {/* 🪪 Customer Only: Driver's License */}
                             {credentials.userType === "Customer" && (
                                 <div>
                                     <label className="block text-gray-700">Driver's License</label>
@@ -356,7 +362,7 @@ export default function AuthPage() {
                         </>
                     )}
 
-                    {/* 🚀 Submit Button */}
+                    {/* Submit Button */}
                     <button
                         type="submit"
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
@@ -365,7 +371,7 @@ export default function AuthPage() {
                     </button>
                 </form>
 
-                {/* 🔄 Toggle between Login and Register */}
+                {/* Toggle between Login and Register */}
                 <div className="mt-4 text-center">
                     {isLogin ? (
                         <p>
