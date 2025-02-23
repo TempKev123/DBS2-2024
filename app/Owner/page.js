@@ -1,51 +1,104 @@
-"use client"; // Needed for state and interactivity
-//FIX THE FLOATING REPORT
-import { useState } from "react";
+
+"use client";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Card from "@/components/Card";
-
-const reportedItems = [
-  { id: 1, type: "Van", name: "Ford Transit", rate: "$50/day", description: "A white van with a broken side mirror.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Free" },
-  { id: 2, type: "Car", name: "Toyota Corolla", rate: "$30/day", description: "A red car with a flat tire.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Free" },
-  { id: 3, type: "Truck", name: "Mack Anthem", rate: "$100/day", description: "A heavy-duty truck with engine issues.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Rented" },
-  { id: 4, type: "Car", name: "Honda Civic", rate: "$45/day", description: "A silver car with minor dents on the bumper.", imageUrl: "https://media.istockphoto.com/id/1133431051/vector/car-line-icon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=E9t9aitIGYdX-cggrORFCY1dZR-Y8ff37MbXXLDrv9I=", status: "Rented" },
-];
-var username="Gregor Sinclair"
+import { useRouter } from "next/navigation";
 
 export default function Owner() {
   const [filter, setFilter] = useState("All");
-  const [selectedReport, setSelectedReport] = useState(null);
+  const [cars, setCars] = useState([]);
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showAddCarModal, setShowAddCarModal] = useState(false);
+  const [user, setUser] = useState(null);
+  const [newCar, setNewCar] = useState({
+    brand: "",
+    model: "",
+    manufacturedYear: "",
+    pricePerDay: "",
+    availability: true,
+    carType: "",
+    ownerId: null,
+  });
 
-  // Filter reports based on the selected type
-  const filteredReports = filter === "All" ? reportedItems : reportedItems.filter((item) => item.type === filter);
+  const router = useRouter();
+
+  // Fetch user and cars on page load
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser || storedUser.userType !== "Owner") {
+      alert("Access denied. Only owners can view this page.");
+      router.push("/");
+      return;
+    }
+
+    setUser(storedUser);
+    setNewCar((prev) => ({ ...prev, ownerId: storedUser.id }));
+
+    const fetchCars = async () => {
+      try {
+        const response = await fetch(`/api/cars?ownerId=${storedUser.id}`);
+        if (!response.ok) throw new Error("Failed to fetch cars");
+
+        const data = await response.json();
+        setCars(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching cars:", error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, [router]);
+
+  // Filter cars by type
+  const filteredCars =
+    filter === "All" ? cars : cars.filter((car) => car.carType === filter);
+
+  // Handle Add Car
+  const handleAddCar = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/cars", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCar),
+      });
+
+      if (!response.ok) throw new Error("Failed to add car.");
+
+      alert("Car added successfully!");
+      setShowAddCarModal(false);
+      setNewCar({ brand: "", model: "", manufacturedYear: "", pricePerDay: "", availability: true, carType: "", ownerId: user?.id });
+
+      // Refresh the car list
+      const updatedCars = await fetch(`/api/cars?ownerId=${user.id}`);
+      setCars(await updatedCars.json());
+    } catch (error) {
+      console.error("Error adding car:", error.message);
+      alert("Failed to add car.");
+    }
+  };
 
   return (
     <div className="bg-green-800 text-white min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Welcome Section */}
-      <section className="flex-grow text-center py-20">
-        <h1 className="text-4xl font-bold mb-4">Welcome Owner, {username}</h1>
+      <section className="flex-grow text-center py-10">
+        <h1 className="text-4xl font-bold mb-4">Welcome, {user?.name}</h1>
       </section>
-      {/* add button */}
-      <button
-        onClick={() => { }}
-        style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          backgroundColor: '#007BFF',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          transition: 'background-color 0.3s ease'
-        }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#007BFF'}
-      >
-        Add
-      </button>
 
+      {/* Add Car Button */}
+      <div className="text-center mb-4">
+        <button
+          onClick={() => setShowAddCarModal(true)}
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg transition"
+        >
+          Add Vehicle
+        </button>
+      </div>
 
       {/* Filter Section */}
       <section className="bg-gray-900 py-6">
@@ -56,8 +109,7 @@ export default function Owner() {
               <button
                 key={type}
                 onClick={() => setFilter(type)}
-                className={`px-4 py-2 rounded-lg ${filter === type ? "bg-blue-500" : "bg-gray-700 hover:bg-gray-600"
-                  } text-white transition duration-300`}
+                className={`px-4 py-2 rounded-lg ${filter === type ? "bg-blue-500" : "bg-gray-700 hover:bg-gray-600"} text-white transition duration-300`}
               >
                 {type}
               </button>
@@ -66,50 +118,85 @@ export default function Owner() {
         </div>
       </section>
 
-      {/* Reported List Section */}
-      <section className="bg-gray-900 py-12">
+      {/* Car List Section */}
+      <section className="bg-gray-900 py-10">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-semibold text-white mb-6">Your Vehicles</h2>
 
-          {/* No reports message */}
-          {filteredReports.length === 0 ? (
-            <p className="text-gray-400">No reports found.</p>
+          {loading ? (
+            <p className="text-gray-400">Loading your cars...</p>
+          ) : filteredCars.length === 0 ? (
+            <p className="text-gray-400">No cars found.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredReports.map((item) => (
+              {filteredCars.map((car) => (
                 <Card
-                  key={item.id}
-                  title={`${item.type}: ${item.name}`}
-                  description={`Description: ${item.description}`}
-                  ownername={`Price: ${item.rate}`}
-                  imageUrl={item.imageUrl}
-                  /*buttonText="View Report"
-                  onClick={() => setSelectedReport(item)} // Open modal with report details*/
-                /> 
+                  key={car.car_id}
+                  title={`${car.brand} ${car.model}`}
+                  description={`Year: ${car.manufacturedyear}`}
+                  ownername={`Price: $${car.price_per_day}/day`}
+                  imageUrl="https://via.placeholder.com/150"
+                  buttonText="View Details"
+                  onClick={() => setSelectedCar(car)}
+                />
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* Floating Report Detail Modal */}
-      {selectedReport && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-lg max-w-lg w-full relative">
-            <button
-              onClick={() => setSelectedReport(null)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl"
-            >
-              ✕
-            </button>
-
-            <img className="w-full h-48 object-cover rounded-lg" src={selectedReport.imageUrl} alt={selectedReport.name} />
-            <h2 className="text-2xl font-bold mt-4 text-gray-800">{selectedReport.type}: {selectedReport.name}</h2>
-            <p className="text-gray-600 mt-2">💰 Rate: {selectedReport.rate}</p>
-            <p className="text-gray-600 mt-2">📌 Description: {selectedReport.description}</p>
-            <p className={`mt-4 text-lg font-semibold ${selectedReport.status === "Resolved" ? "text-green-500" : "text-red-500"}`}>
-              Status: {selectedReport.status}
-            </p>
+      {/* Add Car Modal */}
+      {showAddCarModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" onClick={() => setShowAddCarModal(false)}>
+          <div className="bg-white p-6 rounded-2xl shadow-lg max-w-lg w-full relative" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Car</h2>
+            <form onSubmit={handleAddCar} className="space-y-4">
+              <input
+                type="text"
+                placeholder="Brand"
+                value={newCar.brand}
+                onChange={(e) => setNewCar({ ...newCar, brand: e.target.value })}
+                className="w-full p-2 border rounded text-black"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Model"
+                value={newCar.model}
+                onChange={(e) => setNewCar({ ...newCar, model: e.target.value })}
+                className="w-full p-2 border rounded text-black"
+                required
+              />
+              <input
+                type="number"
+                placeholder="Manufactured Year"
+                value={newCar.manufacturedYear}
+                onChange={(e) => setNewCar({ ...newCar, manufacturedYear: e.target.value })}
+                className="w-full p-2 border rounded text-black"
+                required
+              />
+              <input
+                type="number"
+                placeholder="Price Per Day"
+                value={newCar.pricePerDay}
+                onChange={(e) => setNewCar({ ...newCar, pricePerDay: e.target.value })}
+                className="w-full p-2 border rounded text-black"
+                required
+              />
+              <select
+                value={newCar.carType}
+                onChange={(e) => setNewCar({ ...newCar, carType: e.target.value })}
+                className="w-full p-2 border rounded text-black"
+                required
+              >
+                <option value="">Select Car Type</option>
+                <option value="Truck">Truck</option>
+                <option value="Van">Van</option>
+                <option value="Car">Car</option>
+              </select>
+              <button type="submit" className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg">Add Car</button>
+              <button type="button" onClick={() => setShowAddCarModal(false)} className="ml-2 px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg">Cancel</button>
+            </form>
           </div>
         </div>
       )}
@@ -121,5 +208,3 @@ export default function Owner() {
     </div>
   );
 }
-
-
