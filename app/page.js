@@ -70,7 +70,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
-    const [isLogin, setIsLogin] = useState(true); // Toggle between login and register
+    const [isLogin, setIsLogin] = useState(true);
     const [credentials, setCredentials] = useState({
         email: "",
         password: "",
@@ -83,28 +83,23 @@ export default function AuthPage() {
         city: "",
         province: "",
         country: "",
-        driverLicense: "" // For customers only
+        driverLicense: "" 
     });
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const router = useRouter();
 
-    // Handle input changes
+    // 🌟 Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setCredentials({ ...credentials, [name]: value });
     };
 
-    // Field validation function
+    // 🛠️ Field validation function
     const validateFields = () => {
-        const requiredFields = [
-            "firstName", "lastName", "email", "password", "phone", "address", "street", "city", "province", "country"
-        ];
-
-        if (credentials.userType === "Customer") {
-            requiredFields.push("driverLicense");
-        }
+        const requiredFields = ["firstName", "lastName", "email", "password", "phone", "address", "street", "city", "province", "country"];
+        if (credentials.userType === "Customer") requiredFields.push("driverLicense");
 
         for (const field of requiredFields) {
             if (!credentials[field] || credentials[field].trim() === "") {
@@ -115,36 +110,42 @@ export default function AuthPage() {
         return true;
     };
 
-    // Handle login submission
+    // 🔐 Handle login submission
     const handleLogin = async (e) => {
         e.preventDefault();
+        setError("");
+        setSuccess("");
 
         const { email, password } = credentials;
-        const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (response.ok && data.user) {
-            localStorage.setItem("user", JSON.stringify(data.user));
-            
-            // Redirect based on userType
-            if (data.user.userType === "Owner") {
-                router.push("/Owner");
-            } else if (data.user.userType === "Customer") {
-                router.push("/Rent");  // Change to the customer page route
+            if (response.ok && data.user) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+
+                // Redirect based on userType
+                if (data.user.userType === "Owner") {
+                    router.push("/Owner");
+                } else if (data.user.userType === "Customer") {
+                    router.push("/Rent"); 
+                } else {
+                    alert("Access denied. Unknown user type.");
+                }
             } else {
-                alert("Access denied. Unknown user type.");
+                setError(data.error || "❌ Login failed.");
             }
-        } else {
-            alert(data.error || "Login failed.");
+        } catch (err) {
+            setError("❌ Network error. Please try again.");
         }
     };
 
-    // Handle registration submission
+    // 📝 Handle registration
     const handleRegister = async (e) => {
         e.preventDefault();
         setError("");
@@ -152,22 +153,24 @@ export default function AuthPage() {
 
         if (!validateFields()) return;
 
-        console.log("🔍 Sending data to API:", credentials);
+        try {
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(credentials),
+            });
 
-        const response = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(credentials),
-        });
+            const data = await response.json();
 
-        const data = await response.json();
-        console.log("🚀 API Response:", data);
-
-        if (response.ok) {
-            setSuccess("Account created successfully! Please log in.");
-            setIsLogin(true);
-        } else {
-            setError(data.error || "Failed to register.");
+            if (response.ok) {
+                setSuccess("✅ Account created successfully! Please log in.");
+                setIsLogin(true);
+                setCredentials({ email: "", password: "" });
+            } else {
+                setError(data.error || "❌ Failed to register.");
+            }
+        } catch (err) {
+            setError("❌ Network error during registration.");
         }
     };
 
@@ -182,7 +185,7 @@ export default function AuthPage() {
                 {success && <p className="text-green-500 text-center mb-4">{success}</p>}
 
                 <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
-                    {/* Common Fields for Login and Register */}
+                    {/* 🟢 Email & Password (Common) */}
                     <div>
                         <label className="block text-gray-700">Email</label>
                         <input
@@ -191,7 +194,7 @@ export default function AuthPage() {
                             value={credentials.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border rounded-lg"
                             placeholder="Enter your email"
                         />
                     </div>
@@ -204,29 +207,29 @@ export default function AuthPage() {
                             value={credentials.password}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border rounded-lg"
                             placeholder="Enter password"
                         />
                     </div>
 
+                    {/* 📝 Registration Fields */}
                     {!isLogin && (
                         <>
-                            {/* User Type Selection */}
                             <div>
                                 <label className="block text-gray-700">User Type</label>
                                 <select
                                     name="userType"
                                     value={credentials.userType}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 border rounded-lg"
                                 >
                                     <option value="Customer">Customer</option>
                                     <option value="Owner">Owner</option>
                                 </select>
                             </div>
 
-                            {/* Personal Details */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* 🔑 Personal Info */}
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-gray-700">First Name</label>
                                     <input
@@ -267,7 +270,7 @@ export default function AuthPage() {
                                 />
                             </div>
 
-                            {/* Address Fields */}
+                            {/* 🏡 Address Info */}
                             <div>
                                 <label className="block text-gray-700">Address</label>
                                 <input
@@ -294,7 +297,7 @@ export default function AuthPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-gray-700">City</label>
                                     <input
@@ -335,7 +338,7 @@ export default function AuthPage() {
                                 </div>
                             </div>
 
-                            {/* Customer-Specific Field */}
+                            {/* 🪪 Customer Only: Driver's License */}
                             {credentials.userType === "Customer" && (
                                 <div>
                                     <label className="block text-gray-700">Driver's License</label>
@@ -353,32 +356,28 @@ export default function AuthPage() {
                         </>
                     )}
 
+                    {/* 🚀 Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
                     >
                         {isLogin ? "Login" : "Register"}
                     </button>
                 </form>
 
+                {/* 🔄 Toggle between Login and Register */}
                 <div className="mt-4 text-center">
                     {isLogin ? (
                         <p>
                             Don't have an account?{" "}
-                            <button
-                                onClick={() => setIsLogin(false)}
-                                className="text-blue-500 underline"
-                            >
+                            <button onClick={() => setIsLogin(false)} className="text-blue-500 underline">
                                 Register here
                             </button>
                         </p>
                     ) : (
                         <p>
                             Already have an account?{" "}
-                            <button
-                                onClick={() => setIsLogin(true)}
-                                className="text-blue-500 underline"
-                            >
+                            <button onClick={() => setIsLogin(true)} className="text-blue-500 underline">
                                 Login here
                             </button>
                         </p>
