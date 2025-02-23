@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 export default function Owner() {
     const [filter, setFilter] = useState("All");
     const [cars, setCars] = useState([]);
-    const [selectedCar, setSelectedCar] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showAddCarModal, setShowAddCarModal] = useState(false);
     const [user, setUser] = useState(null);
@@ -85,6 +84,30 @@ export default function Owner() {
         }
     };
 
+    // Handle Delete Car
+    const handleDeleteCar = async (carId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this car?");
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`/api/carOwner?carId=${carId}`, {
+                method: "DELETE",
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("✅ Car deleted successfully!");
+                fetchOwnerCars(user.ownerId);
+            } else {
+                alert(result.error || "❌ Cannot delete the car. It might be currently rented.");
+            }
+        } catch (error) {
+            console.error("❌ Error deleting car:", error.message);
+            alert("Failed to delete the car.");
+        }
+    };
+
     // Filter cars by type
     const filteredCars = filter === "All" ? cars : cars.filter((car) => car.car_type === filter);
 
@@ -136,15 +159,23 @@ export default function Owner() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredCars.map((car) => (
-                                <Card
-                                    key={car.car_id}
-                                    title={`${car.brand} ${car.model}`}
-                                    description={`Year: ${car.manufacturedyear}`}
-                                    ownername={`Price: $${car.price_per_day}/day`}
-                                    imageUrl="https://via.placeholder.com/150"
-                                    buttonText="View Details"
-                                    onClick={() => setSelectedCar(car)}
-                                />
+                                <div key={car.car_id} className="bg-white p-4 rounded-lg shadow-lg text-black">
+                                    <h3 className="text-xl font-bold mb-2">{car.brand} {car.model}</h3>
+                                    <p><strong>Year:</strong> {car.manufacturedyear}</p>
+                                    <p><strong>Type:</strong> {car.car_type}</p>
+                                    <p><strong>Price per Day:</strong> ${car.price_per_day}</p>
+                                    <p><strong>Availability:</strong> {car.availability ? "Available" : "Rented"}</p>
+
+                                    <div className="mt-4 flex justify-center">
+                                        <button
+                                            onClick={() => handleDeleteCar(car.car_id)}
+                                            disabled={!car.availability}
+                                            className={`px-4 py-2 rounded-lg ${car.availability ? "bg-red-500 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"} text-white`}
+                                        >
+                                            {car.availability ? "Delete Car" : "Rented - Cannot Delete"}
+                                        </button>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )}

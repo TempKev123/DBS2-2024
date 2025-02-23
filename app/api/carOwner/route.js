@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import { Client } from "pg";
 
-// GET: Fetch cars for a specific owner
+// Database connection settings
+const dbConfig = {
+    host: "localhost",
+    user: "postgres",
+    password: "1293", // Update this with your actual password
+    database: "CarRentalDB",
+    port: 5432,
+};
+
+// 🚗 GET: Fetch cars for a specific owner
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const ownerId = searchParams.get("ownerId");
@@ -10,13 +19,7 @@ export async function GET(req) {
         return NextResponse.json({ error: "Owner ID is required" }, { status: 400 });
     }
 
-    const client = new Client({
-        host: "localhost",
-        user: "postgres",
-        password: "1293",
-        database: "CarRentalDB",
-        port: 5432,
-    });
+    const client = new Client(dbConfig);
 
     try {
         await client.connect();
@@ -36,7 +39,7 @@ export async function GET(req) {
     }
 }
 
-// POST: Add a new car for the logged-in owner
+// 🚗 POST: Add a new car for the logged-in owner
 export async function POST(req) {
     const body = await req.json();
     const { brand, model, manufacturedYear, pricePerDay, availability, carType, ownerId } = body;
@@ -45,13 +48,7 @@ export async function POST(req) {
         return NextResponse.json({ error: "All fields are required." }, { status: 400 });
     }
 
-    const client = new Client({
-        host: "localhost",
-        user: "postgres",
-        password: "1293",
-        database: "CarRentalDB",
-        port: 5432,
-    });
+    const client = new Client(dbConfig);
 
     try {
         await client.connect();
@@ -65,6 +62,49 @@ export async function POST(req) {
     } catch (error) {
         console.error("❌ Error adding car:", error.message);
         return NextResponse.json({ error: "Failed to add car." }, { status: 500 });
+    } finally {
+        await client.end();
+    }
+}
+
+// 🚗 DELETE: Remove a car by ID (Prevent deletion if rented)
+export async function DELETE(req) {
+    const { searchParams } = new URL(req.url);
+    const carId = searchParams.get("carId");
+
+    if (!carId) {
+        return NextResponse.json({ error: "Car ID is required for deletion." }, { status: 400 });
+    }
+
+    const client = new Client(dbConfig);
+
+    try {
+        await client.connect();
+
+        // Check if car is currently rented
+        const bookingResult = await client.query(
+            "SELECT * FROM Booking WHERE car_id = $1 AND status != 'Returned'",
+            [carId]
+        );
+
+        if (bookingResult.rows.length > 0) {
+            return NextResponse.json({ error: "Cannot delete car. It is currently rented." }, { status: 403 });
+        }
+
+        // Proceed to delete the car
+        const deleteResult = await client.query(
+            "DELETE FROM Cars WHERE car_id = $1 RETURNING *",
+            [carId]
+        );
+
+        if (deleteResult.rowCount === 0) {
+            return NextResponse.json({ error: "Car not found or already deleted." }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: "✅ Car deleted successfully!" });
+    } catch (error) {
+        console.error("❌ Error deleting car:", error.message);
+        return NextResponse.json({ error: "Failed to delete car." }, { status: 500 });
     } finally {
         await client.end();
     }
