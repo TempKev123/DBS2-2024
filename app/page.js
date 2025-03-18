@@ -201,7 +201,7 @@ export default function AuthPage() {
                             value={credentials.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border rounded-lg"
+                            className="w-full px-4 py-2 border rounded-lg text-black"
                             placeholder="Enter your email"
                         />
                     </div>
@@ -214,7 +214,7 @@ export default function AuthPage() {
                             value={credentials.password}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border rounded-lg"
+                            className="w-full px-4 py-2 border rounded-lg text-black"
                             placeholder="Enter password"
                         />
                     </div>
@@ -228,7 +228,7 @@ export default function AuthPage() {
                                     name="userType"
                                     value={credentials.userType}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 border rounded-lg"
+                                    className="w-full px-4 py-2 border rounded-lg text-black"
                                 >
                                     <option value="Customer">Customer</option>
                                     <option value="Owner">Owner</option>
@@ -245,7 +245,7 @@ export default function AuthPage() {
                                         value={credentials.firstName}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-2 border rounded-lg"
+                                        className="w-full px-4 py-2 border rounded-lg text-black"
                                         placeholder="First name"
                                     />
                                 </div>
@@ -258,7 +258,7 @@ export default function AuthPage() {
                                         value={credentials.lastName}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-2 border rounded-lg"
+                                        className="w-full px-4 py-2 border rounded-lg text-black"
                                         placeholder="Last name"
                                     />
                                 </div>
@@ -272,7 +272,7 @@ export default function AuthPage() {
                                     value={credentials.phone}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-2 border rounded-lg"
+                                    className="w-full px-4 py-2 border rounded-lg text-black"
                                     placeholder="Phone number"
                                 />
                             </div>
@@ -286,7 +286,7 @@ export default function AuthPage() {
                                     value={credentials.address}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-2 border rounded-lg"
+                                    className="w-full px-4 py-2 border rounded-lg text-black"
                                     placeholder="Full address"
                                 />
                             </div>
@@ -299,7 +299,7 @@ export default function AuthPage() {
                                     value={credentials.street}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-2 border rounded-lg"
+                                    className="w-full px-4 py-2 border rounded-lg text-black"
                                     placeholder="Street"
                                 />
                             </div>
@@ -313,7 +313,7 @@ export default function AuthPage() {
                                         value={credentials.city}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-2 border rounded-lg"
+                                        className="w-full px-4 py-2 border rounded-lg text-black"
                                         placeholder="City"
                                     />
                                 </div>
@@ -326,7 +326,7 @@ export default function AuthPage() {
                                         value={credentials.province}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-2 border rounded-lg"
+                                        className="w-full px-4 py-2 border rounded-lg text-black"
                                         placeholder="Province"
                                     />
                                 </div>
@@ -339,7 +339,7 @@ export default function AuthPage() {
                                         value={credentials.country}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-2 border rounded-lg"
+                                        className="w-full px-4 py-2 border rounded-lg text-black"
                                         placeholder="Country"
                                     />
                                 </div>
@@ -354,7 +354,7 @@ export default function AuthPage() {
                                         value={credentials.driverLicense}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-2 border rounded-lg"
+                                        className="w-full px-4 py-2 border rounded-lg text-black"
                                         placeholder="Driver's License"
                                     />
                                 </div>

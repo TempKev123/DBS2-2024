@@ -116,7 +116,7 @@ export default function Owner() {
             <Navbar />
 
             <section className="flex-grow text-center py-10">
-                <h1 className="text-4xl font-bold mb-4">Welcome, {user?.name}</h1>
+                <h1 className="text-4xl font-bold mb-4">Welcome, Owner!</h1>
             </section>
 
             {/* Add Car Button */}

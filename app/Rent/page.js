@@ -12,6 +12,13 @@ export default function Rent() {
     const [loading, setLoading] = useState(true);
     const [carTypes, setCarTypes] = useState(["All"]);
     const [customerId, setCustomerId] = useState(null);
+    const [adminId, setAdminId] = useState(null);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportDetails, setReportDetails] = useState({
+        carId: null,
+        reason: "",
+        description: ""
+    });
     const [bookingDetails, setBookingDetails] = useState({
         startDate: "",
         endDate: "",
@@ -25,6 +32,7 @@ export default function Rent() {
         dropOffCountry: "",
         totalPrice: 0,
     });
+    
 
     const router = useRouter();
 
@@ -34,6 +42,7 @@ export default function Rent() {
         if (storedUser?.userType === "Customer" && storedUser.customerId) {
             setCustomerId(storedUser.customerId);
             fetchRentedCars(storedUser.customerId);
+            fetchAdminId();
         } else {
             alert("Access denied. Only customers can book a car.");
             router.push("/");
@@ -42,6 +51,26 @@ export default function Rent() {
 
         fetchCars();
     }, [router]);
+
+     // Fetch Admin ID
+     const fetchAdminId = async () => {
+        try {
+            const response = await fetch("/api/users?userType=Admin");
+            if (!response.ok) throw new Error("Failed to fetch admin.");
+            const admins = await response.json();
+            console.log("🚀 Fetched Admins:", admins);  // Debugging line
+    
+            if (admins.length > 0) {
+                setAdminId(admins[0].user_id);
+                console.log("✅ Admin ID fetched:", admins[0].user_id);
+            } else {
+                console.warn("⚠️ No admin found.");
+            }
+        } catch (error) {
+            console.error("❌ Error fetching admin ID:", error.message);
+        }
+    };
+
 
     // Fetch available cars
     const fetchCars = async () => {
@@ -72,6 +101,8 @@ export default function Rent() {
             console.error("❌ Error fetching rented cars:", error.message);
         }
     };
+
+
 
     // Calculate total price
     const calculateTotalPrice = () => {
@@ -175,6 +206,47 @@ export default function Rent() {
         }
     };
 
+    // Handle Report Submission
+    const handleReportSubmit = async () => {
+        const { carId, reason, description } = reportDetails;
+
+        if (!adminId) {
+            alert("❌ Admin not found. Cannot submit report.");
+            return;
+        }
+
+        if (!reason || !description) {
+            alert("❌ Reason and description are required.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/report", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    customerId,
+                    carId,
+                    reason,
+                    description,
+                    adminId  // Ensure adminId is passed correctly
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("✅ Report submitted successfully!");
+                setShowReportModal(false);
+                setReportDetails({ carId: null, reason: "", description: "" });
+            } else {
+                alert(data.error || "❌ Failed to submit the report.");
+            }
+        } catch (error) {
+            console.error("❌ Report submission error:", error.message);
+        }
+    };
+
     const filteredCars = filter === "All" ? cars : cars.filter((car) => car.car_type === filter);
 
     return (
@@ -237,20 +309,73 @@ export default function Rent() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {rentedCars.map((car) => (
-                                <Card
-                                    key={car.booking_id}
-                                    title={`${car.brand} ${car.model}`}
-                                    description={`Rented from ${car.start_date} to ${car.end_date}`}
-                                    ownername={`Price: $${car.total_price}`}
-                                    imageUrl="https://via.placeholder.com/150"
-                                    buttonText="Return Car"
-                                    onClick={() => handleReturnCar(car.booking_id, car.car_id)}
-                                />
+                                <div key={car.booking_id} className="bg-white p-4 rounded-lg shadow-lg text-black">
+                                    <img src="https://via.placeholder.com/150" alt={car.brand} className="w-full h-40 object-cover rounded-md mb-4" />
+                                    <h3 className="text-xl font-bold">{car.brand} {car.model}</h3>
+                                    <p>Rented from {car.start_date} to {car.end_date}</p>
+                                    <p>Price: ${car.total_price}</p>
+                                    <div className="mt-4 space-x-2">
+                                        <button
+                                            onClick={() => handleReturnCar(car.booking_id, car.car_id)}
+                                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                        >
+                                            Return Car
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setReportDetails({ carId: car.car_id, reason: "", description: "" });
+                                                setShowReportModal(true);
+                                            }}
+                                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                        >
+                                            Report Car
+                                        </button>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )}
                 </div>
             </section>
+
+            {/* Report Modal */}
+            {showReportModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                        <h2 className="text-2xl font-bold mb-4">Report Car Issue</h2>
+                        <label className="block mb-2 text-black">Reason for Report</label>
+                        <input
+                            type="text"
+                            value={reportDetails.reason}
+                            onChange={(e) => setReportDetails({ ...reportDetails, reason: e.target.value })}
+                            className="w-full p-2 border rounded-lg mb-4 text-black"
+                            placeholder="Enter reason for reporting"
+                        />
+                        <label className="block mb-2 text-black">Description</label>
+                        <textarea
+                            className="w-full p-2 border rounded-lg text-black"
+                            rows="4"
+                            placeholder="Describe the issue..."
+                            value={reportDetails.description}
+                            onChange={(e) => setReportDetails({ ...reportDetails, description: e.target.value })}
+                        ></textarea>
+                        <div className="flex justify-end space-x-2 mt-4">
+                            <button
+                                onClick={handleReportSubmit}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                            >
+                                Submit Report
+                            </button>
+                            <button
+                                onClick={() => setShowReportModal(false)}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {selectedCar && (
                 <div className="fixed inset-0 overflow-y-auto bg-black bg-opacity-50 z-50 flex items-center justify-center">
